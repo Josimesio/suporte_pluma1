@@ -178,3 +178,23 @@ body.tv-mode .pl-footer {
     opacity: 0.6;
     font-size: 0.7rem;
 }
+/* ========================= */
+/*  AJUSTE DE TAMANHO DOS GRÁFICOS  */
+/* ========================= */
+
+/* reduz a altura das cards de gráficos */
+.grafico-card {
+    max-height: 22vh;  /* antes era quase 30~35vh visualmente */
+    min-height: 18vh;
+}
+
+/* garante que o canvas não estoure */
+.grafico-canvas-wrapper {
+    height: 100% !important;
+}
+
+.grafico-canvas-wrapper canvas {
+    height: 100% !important;
+    width: 100% !important;
+}
+

@@ -37,7 +37,7 @@ function agendarProximaRotacao() {
     seletor.value = valor;
     atualizarDashboard();
 
-    const delay = (valor === "") ? 15000 : 10000; // 15s em "Todos", 10s nos módulos
+    const delay = (valor === "") ? 150000 : 10000; // 15s em "Todos", 10s nos módulos
     indiceModulo = (indiceModulo + 1) % listaModulos.length;
 
     timeoutRotacao = setTimeout(agendarProximaRotacao, delay);

@@ -1,10 +1,6 @@
 let dadosBrutos = [];
 let chartServico, chartSeveridade, chartData, chartIssueType;
 
-let indiceModulo = 0;
-let listaModulos = [];
-let timeoutRotacao = null;
-
 // ===============================
 // REGISTRO DO PLUGIN DE RÓTULOS
 // ===============================
@@ -14,431 +10,520 @@ Chart.register(ChartDataLabels);
 // ANIMAÇÃO VISUAL DE ATUALIZAÇÃO
 // ===============================
 function animarAtualizacao() {
-    const kpiCards = document.querySelectorAll(".kpi-card");
-    const graficoCards = document.querySelectorAll(".grafico-card");
-    const tabelaCard = document.querySelector(".tabela-card");
+  const kpiCards = document.querySelectorAll(".kpi-card");
+  const graficoCards = document.querySelectorAll(".grafico-card");
+  const tabelaCard = document.querySelector(".tabela-card");
 
-    [...kpiCards, ...graficoCards, tabelaCard].forEach(el => {
-        if (!el) return;
-        el.classList.remove("animate-update");
-        void el.offsetWidth; // reflow
-        el.classList.add("animate-update");
-    });
-}
-
-// ===============================
-// ROTACIONAR MÓDULOS (10s / 15s em "Todos")
-// ===============================
-function agendarProximaRotacao() {
-    const seletor = document.getElementById("filtroServico");
-    if (!seletor || listaModulos.length === 0) return;
-
-    const valor = listaModulos[indiceModulo];
-    seletor.value = valor;
-    atualizarDashboard();
-
-    const delay = (valor === "") ? 150000 : 10000; // 15s em "Todos", 10s nos módulos
-    indiceModulo = (indiceModulo + 1) % listaModulos.length;
-
-    timeoutRotacao = setTimeout(agendarProximaRotacao, delay);
-}
-
-function iniciarRotacaoAutomatica() {
-    const seletor = document.getElementById("filtroServico");
-    if (!seletor) return;
-
-    const valores = Array.from(seletor.options).map(o => o.value);
-    const todos = ""; // valor da opção "Todos"
-    const modulos = valores.filter(v => v !== "");
-
-    // sequência: Todos -> módulo1 -> módulo2 -> ...
-    listaModulos = [todos, ...modulos];
-
-    if (listaModulos.length === 0) return;
-
-    if (timeoutRotacao) clearTimeout(timeoutRotacao);
-    indiceModulo = 0;
-    agendarProximaRotacao();
+  [...kpiCards, ...graficoCards, tabelaCard].forEach(el => {
+    if (!el) return;
+    el.classList.remove("animate-update");
+    void el.offsetWidth; // reflow
+    el.classList.add("animate-update");
+  });
 }
 
 // ===============================
 // MODO TV / TELA CHEIA
 // ===============================
 function toggleTvMode() {
-    const btn = document.getElementById("btnTvMode");
-    const emTelaCheia = !!document.fullscreenElement;
+  const btn = document.getElementById("btnTvMode");
+  const emTelaCheia = !!document.fullscreenElement;
 
-    if (!emTelaCheia) {
-        document.documentElement.requestFullscreen?.().catch(() => {});
-        document.body.classList.add("tv-mode");
-        if (btn) btn.textContent = "⏹ Sair Modo TV";
-    } else {
-        document.exitFullscreen?.();
-        document.body.classList.remove("tv-mode");
-        if (btn) btn.textContent = "🎬 Modo TV";
-    }
+  if (!emTelaCheia) {
+    document.documentElement.requestFullscreen?.().catch(() => {});
+    document.body.classList.add("tv-mode");
+    if (btn) btn.textContent = "⏹ Sair Modo TV";
+  } else {
+    document.exitFullscreen?.();
+    document.body.classList.remove("tv-mode");
+    if (btn) btn.textContent = "🎬 Modo TV";
+  }
 }
 
 document.addEventListener("fullscreenchange", () => {
-    const btn = document.getElementById("btnTvMode");
-    if (!document.fullscreenElement) {
-        document.body.classList.remove("tv-mode");
-        if (btn) btn.textContent = "🎬 Modo TV";
-    } else {
-        document.body.classList.add("tv-mode");
-        if (btn) btn.textContent = "⏹ Sair Modo TV";
-    }
+  const btn = document.getElementById("btnTvMode");
+  if (!btn) return;
+
+  if (!document.fullscreenElement) {
+    document.body.classList.remove("tv-mode");
+    btn.textContent = "🎬 Modo TV";
+  } else {
+    document.body.classList.add("tv-mode");
+    btn.textContent = "⏹ Sair Modo TV";
+  }
 });
 
 // ===============================
 // FUNÇÕES DE CONTAGEM E PARSE
 // ===============================
 function contarPorCampo(lista, campo) {
-    const mapa = {};
-    lista.forEach(item => {
-        const valor = item[campo] || "Não informado";
-        mapa[valor] = (mapa[valor] || 0) + 1;
-    });
-    return mapa;
+  const mapa = {};
+  lista.forEach(item => {
+    const valor = item[campo] || "Não informado";
+    mapa[valor] = (mapa[valor] || 0) + 1;
+  });
+  return mapa;
 }
 
 function valoresUnicos(lista, campo) {
-    return Array.from(new Set(
-        lista.map(item => item[campo]).filter(v => v && v.trim() !== "")
-    )).sort();
+  return Array.from(new Set(
+    lista.map(item => item[campo]).filter(v => v && v.trim() !== "")
+  )).sort();
 }
 
+// CSV simples (suporta vírgulas dentro de aspas)
 function parseCSV(texto) {
-    const linhas = texto.split(/\r?\n/).filter(l => l.trim() !== "");
-    const cabecalho = linhas[0].split(",");
-    const dados = [];
+  const linhas = texto.split(/\r?\n/).filter(l => l.trim() !== "");
+  const cabecalho = linhas[0].split(",");
+  const dados = [];
 
-    for (let i = 1; i < linhas.length; i++) {
-        const cols = linhas[i].split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/);
-        const obj = {};
-        for (let j = 0; j < cabecalho.length; j++) {
-            obj[cabecalho[j].trim()] = (cols[j] || "").replace(/^"|"$/g, "").trim();
-        }
-        dados.push(obj);
+  for (let i = 1; i < linhas.length; i++) {
+    const cols = linhas[i].split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/);
+    const obj = {};
+    for (let j = 0; j < cabecalho.length; j++) {
+      obj[cabecalho[j].trim()] = (cols[j] || "").replace(/^"|"$/g, "").trim();
     }
-    return dados;
+    dados.push(obj);
+  }
+  return dados;
 }
+
+// ===============================
+// ✅ PARSE DE DATA “À PROVA DE ORACLE”
+// ===============================
+function parseDataFlex(valor) {
+  if (!valor) return null;
+
+  let s = String(valor).trim();
+  if (!s) return null;
+
+  // remove aspas
+  s = s.replace(/^"|"$/g, "").trim();
+
+  // limpa sufixos comuns (UTC, GMT, etc.)
+  s = s.replace(/\s+(UTC|GMT).*$/i, "").trim();
+
+  // remove milissegundos tipo .000
+  s = s.replace(/\.\d{3,}/g, "").trim();
+
+  // tenta padronizar "YYYY-MM-DD HH:MM:SS" -> "YYYY-MM-DDTHH:MM:SS"
+  if (/^\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}(:\d{2})?$/.test(s)) {
+    s = s.replace(" ", "T");
+  }
+
+  // 1) tenta parse nativo (bom pra ISO)
+  let d = new Date(s);
+  if (!isNaN(d)) return d;
+
+  // 2) dd/mm/yyyy ou dd-mm-yyyy (com ou sem hora)
+  let m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?$/);
+  if (m) {
+    let dia = parseInt(m[1], 10);
+    let mes = parseInt(m[2], 10) - 1;
+    let ano = parseInt(m[3], 10);
+    if (ano < 100) ano += 2000;
+    let hh = parseInt(m[4] || "0", 10);
+    let mm = parseInt(m[5] || "0", 10);
+    let ss = parseInt(m[6] || "0", 10);
+    d = new Date(ano, mes, dia, hh, mm, ss);
+    if (!isNaN(d)) return d;
+  }
+
+  // 3) yyyy/mm/dd ou yyyy-mm-dd (com ou sem hora)
+  m = s.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?$/);
+  if (m) {
+    let ano = parseInt(m[1], 10);
+    let mes = parseInt(m[2], 10) - 1;
+    let dia = parseInt(m[3], 10);
+    let hh = parseInt(m[4] || "0", 10);
+    let mm = parseInt(m[5] || "0", 10);
+    let ss = parseInt(m[6] || "0", 10);
+    d = new Date(ano, mes, dia, hh, mm, ss);
+    if (!isNaN(d)) return d;
+  }
+
+  // 4) dd-MMM-yyyy (ex: 17-DEC-2025 / 17-dez-2025)
+  const meses = {
+    jan: 0, fev: 1, feb: 1, mar: 2, abr: 3, apr: 3, mai: 4, may: 4,
+    jun: 5, jul: 6, ago: 7, aug: 7, set: 8, sep: 8, out: 9, oct: 9,
+    nov: 10, dez: 11, dec: 11
+  };
+
+  m = s.match(/^(\d{1,2})[\-\s\/]([A-Za-zÀ-ÿ]{3,})[\-\s\/](\d{4})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?$/);
+  if (m) {
+    let dia = parseInt(m[1], 10);
+    let mesTxt = m[2].toLowerCase().slice(0, 3);
+    let mes = meses[mesTxt];
+    let ano = parseInt(m[3], 10);
+    let hh = parseInt(m[4] || "0", 10);
+    let mm = parseInt(m[5] || "0", 10);
+    let ss = parseInt(m[6] || "0", 10);
+
+    if (mes !== undefined) {
+      d = new Date(ano, mes, dia, hh, mm, ss);
+      if (!isNaN(d)) return d;
+    }
+  }
+
+  return null;
+}
+
 
 // ===============================
 // FILTROS E BUSCA
 // ===============================
 function filtrarDados() {
-    const servico = document.getElementById("filtroServico").value;
-    const status = document.getElementById("filtroStatus").value;
-    const severidade = document.getElementById("filtroSeveridade").value;
+  const servicoEl = document.getElementById("filtroServico");
+  const statusEl = document.getElementById("filtroStatus");
+  const severidadeEl = document.getElementById("filtroSeveridade");
 
-    return dadosBrutos.filter(item => {
-        if (servico && item["Serviço"] !== servico) return false;
-        if (status && item["Status"] !== status) return false;
-        if (severidade && item["Severidade"] !== severidade) return false;
-        return true;
-    });
+  const servico = servicoEl ? servicoEl.value : "";
+  const status = statusEl ? statusEl.value : "";
+  const severidade = severidadeEl ? severidadeEl.value : "";
+
+  return dadosBrutos.filter(item => {
+    if (servico && item["Serviço"] !== servico) return false;
+    if (status && item["Status"] !== status) return false;
+    if (severidade && item["Severidade"] !== severidade) return false;
+    return true;
+  });
 }
 
 function aplicarBusca(dados) {
-    const campoBusca = document.getElementById("buscaTabela");
-    if (!campoBusca) return dados;
+  const campoBusca = document.getElementById("buscaTabela");
+  if (!campoBusca) return dados;
 
-    const termo = campoBusca.value.trim().toLowerCase();
-    if (!termo) return dados;
+  const termo = campoBusca.value.trim().toLowerCase();
+  if (!termo) return dados;
 
-    return dados.filter(d => {
-        return [
-            d["Número SR"],
-            d["Serviço"],
-            d["Issue Type"],
-            d["Status"],
-            d["Contato Primário"]
-        ].some(campo => (campo || "").toLowerCase().includes(termo));
-    });
+  return dados.filter(d => {
+    return [
+      d["Número SR"],
+      d["Serviço"],
+      d["Issue Type"],
+      d["Status"],
+      d["Contato Primário"]
+    ].some(campo => (campo || "").toLowerCase().includes(termo));
+  });
 }
 
 // ===============================
 // KPIs
 // ===============================
 function atualizarKPIs(dados) {
-    const total = dados.length;
+  const totalEl = document.getElementById("kpiTotal");
+  const abertosEl = document.getElementById("kpiAbertos");
+  const fechadosEl = document.getElementById("kpiFechados");
+  const topModuloEl = document.getElementById("kpiTopModulo");
 
-    // "Fechados" com base no Status
-    const fechados = dados.filter(d => {
-        const st = (d["Status"] || "").toLowerCase();
-        return st.includes("closed") || st.includes("close requested") || st.includes("resolved");
-    }).length;
+  if (!totalEl || !abertosEl || !fechadosEl || !topModuloEl) return;
 
-    document.getElementById("kpiTotal").innerText = total;
-    document.getElementById("kpiAbertos").innerText = total - fechados;
-    document.getElementById("kpiFechados").innerText = fechados;
+  const total = dados.length;
 
-    const porServico = contarPorCampo(dados, "Serviço");
-    let topModulo = "-";
-    let max = 0;
+  const fechados = dados.filter(d => {
+    const st = (d["Status"] || "").toLowerCase();
+    return st.includes("closed") || st.includes("close requested") || st.includes("resolved");
+  }).length;
 
-    for (const [serv, qtd] of Object.entries(porServico)) {
-        if (qtd > max) {
-            max = qtd;
-            topModulo = serv;
-        }
+  totalEl.innerText = total;
+  abertosEl.innerText = total - fechados;
+  fechadosEl.innerText = fechados;
+
+  const porServico = contarPorCampo(dados, "Serviço");
+  let topModulo = "-";
+  let max = 0;
+
+  for (const [serv, qtd] of Object.entries(porServico)) {
+    if (qtd > max) {
+      max = qtd;
+      topModulo = serv;
     }
-    document.getElementById("kpiTopModulo").innerText = topModulo;
+  }
+  topModuloEl.innerText = topModulo;
 }
 
 // ===============================
-// OPÇÕES DE ANIMAÇÃO GRÁFICOS
+// OPÇÕES DE GRÁFICOS
 // ===============================
 function chartAnimOptions(extra = {}) {
-    return {
-        responsive: true,
-        animation: {
-            duration: 800,
-            easing: "easeOutQuart"
-        },
-        ...extra
-    };
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: { duration: 800, easing: "easeOutQuart" },
+    ...extra
+  };
 }
 
 // ===============================
 // GRÁFICO: SRs por Serviço (BARRAS)
 // ===============================
 function atualizarGraficoPorServico(dados) {
-    const contagem = contarPorCampo(dados, "Serviço");
-    const labels = Object.keys(contagem);
-    const valores = Object.values(contagem);
+  const canvas = document.getElementById("graficoPorServico");
+  if (!canvas) return;
 
-    if (chartServico) chartServico.destroy();
+  const contagem = contarPorCampo(dados, "Serviço");
+  const labels = Object.keys(contagem);
+  const valores = Object.values(contagem);
 
-    chartServico = new Chart(document.getElementById("graficoPorServico"), {
-        type: "bar",
-        data: {
-            labels,
-            datasets: [{
-                data: valores,
-                backgroundColor: "#006E51",
-                borderRadius: 4
-            }]
-        },
-        options: chartAnimOptions({
-            plugins: {
-                legend: { display: false },
-                datalabels: {
-                    color: "#000",
-                    anchor: "end",
-                    align: "top",
-                    font: { weight: "bold", size: 10 }
-                }
-            },
-            scales: {
-                x: { ticks: { autoSkip: true, maxRotation: 45, minRotation: 0 } },
-                y: { beginAtZero: true, precision: 0 }
-            }
-        })
-    });
+  if (chartServico) chartServico.destroy();
+
+  chartServico = new Chart(canvas, {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [{
+        data: valores,
+        backgroundColor: "#006E51",
+        borderRadius: 4
+      }]
+    },
+    options: chartAnimOptions({
+      plugins: {
+        legend: { display: false },
+        datalabels: {
+          color: "#000",
+          anchor: "end",
+          align: "top",
+          font: { weight: "bold", size: 10 }
+        }
+      },
+      scales: {
+        x: { ticks: { autoSkip: true, maxRotation: 45, minRotation: 0 } },
+        y: { beginAtZero: true, precision: 0 }
+      }
+    })
+  });
 }
 
 // ===============================
 // GRÁFICO: SRs por Severidade (PIZZA)
 // ===============================
 function atualizarGraficoPorSeveridade(dados) {
-    const contagem = contarPorCampo(dados, "Severidade");
-    const labels = Object.keys(contagem);
-    const valores = Object.values(contagem);
+  const canvas = document.getElementById("graficoPorSeveridade");
+  if (!canvas) return;
 
-    if (chartSeveridade) chartSeveridade.destroy();
+  const contagem = contarPorCampo(dados, "Severidade");
+  const labels = Object.keys(contagem);
+  const valores = Object.values(contagem);
 
-    chartSeveridade = new Chart(document.getElementById("graficoPorSeveridade"), {
-        type: "pie",
-        data: {
-            labels,
-            datasets: [{
-                data: valores,
-                backgroundColor: ["#006E51", "#F2C700", "#003F35", "#77C29B", "#AAAAAA"]
-            }]
-        },
-        options: chartAnimOptions({
-            plugins: {
-                legend: { position: "bottom" },
-                datalabels: {
-                    color: "#000",
-                    formatter: (v) => v,
-                    font: { weight: "bold", size: 10 }
-                }
-            }
-        })
-    });
+  if (chartSeveridade) chartSeveridade.destroy();
+
+  chartSeveridade = new Chart(canvas, {
+    type: "pie",
+    data: {
+      labels,
+      datasets: [{
+        data: valores,
+        backgroundColor: ["#006E51", "#F2C700", "#003F35", "#77C29B", "#AAAAAA"]
+      }]
+    },
+    options: chartAnimOptions({
+      plugins: {
+        legend: { position: "right" },
+        datalabels: {
+          color: "#000",
+          formatter: (v) => v,
+          font: { weight: "bold", size: 10 }
+        }
+      }
+    })
+  });
 }
 
 // ===============================
-// GRÁFICO: SRs por Data de Criação (LINHA)
+// ✅ GRÁFICO: SRs por Data de Criação (POR MÊS)
 // ===============================
 function atualizarGraficoPorData(dados) {
-    const mapa = {};
+  const canvas = document.getElementById("graficoPorData");
+  if (!canvas) return;
 
-    dados.forEach(d => {
-        const dt = d["Criado_dt"];
-        if (!dt) return;
-        const data = new Date(dt);
-        if (isNaN(data)) return;
-        const chave = data.toISOString().slice(0, 10);
-        mapa[chave] = (mapa[chave] || 0) + 1;
-    });
+  // labels fixas do ano 2025 (com zero nos meses sem SR)
+  const labels = [];
+  const mapa = {};
+  for (let m = 1; m <= 12; m++) {
+    const chave = `2025-${String(m).padStart(2, "0")}`;
+    labels.push(chave);
+    mapa[chave] = 0;
+  }
 
-    const labels = Object.keys(mapa).sort();
-    const valores = labels.map(l => mapa[l]);
+  // tenta pegar a data por chaves alternativas também (caso teu CSV mude)
+  const pegarCriado = (d) =>
+    d["Criado_dt"] ||
+    d["Created Date"] ||
+    d["Created"] ||
+    d["Creation Date"] ||
+    "";
 
-    if (chartData) chartData.destroy();
+  dados.forEach(d => {
+    const dtStr = pegarCriado(d);
+    const data = parseDataFlex(dtStr);
+    if (!data) return;
 
-    chartData = new Chart(document.getElementById("graficoPorData"), {
-        type: "line",
-        data: {
-            labels,
-            datasets: [{
-                data: valores,
-                borderColor: "#003F35",
-                backgroundColor: "#003F3533",
-                fill: true,
-                tension: 0.3,
-                pointRadius: 3
-            }]
-        },
-        options: chartAnimOptions({
-            plugins: {
-                legend: { display: false },
-                datalabels: {
-                    align: "top",
-                    anchor: "end",
-                    color: "#000",
-                    font: { weight: "bold", size: 10 }
-                }
-            },
-            scales: {
-                y: { beginAtZero: true, precision: 0 }
-            }
-        })
-    });
+    const ano = data.getFullYear();
+    if (ano !== 2025) return;
+
+    const chave = `${ano}-${String(data.getMonth() + 1).padStart(2, "0")}`;
+    if (mapa[chave] !== undefined) mapa[chave] += 1;
+  });
+
+  const valores = labels.map(l => mapa[l]);
+
+  if (chartData) chartData.destroy();
+
+  chartData = new Chart(canvas, {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [{
+        label: "SRs por mês (2025)",
+        data: valores,
+        backgroundColor: "#003F35",
+        borderRadius: 4
+      }]
+    },
+    options: chartAnimOptions({
+      plugins: {
+        legend: { display: false },
+        datalabels: {
+          color: "#000",
+          anchor: "end",
+          align: "top",
+          font: { weight: "bold", size: 10 }
+        }
+      },
+      scales: {
+        y: { beginAtZero: true, precision: 0 }
+      }
+    })
+  });
 }
 
 // ===============================
 // GRÁFICO: SRs por Tipo de Ocorrência (BARRAS HORIZONTAIS)
 // ===============================
 function atualizarGraficoPorIssueType(dados) {
-    const contagem = contarPorCampo(dados, "Issue Type");
-    const labels = Object.keys(contagem);
-    const valores = Object.values(contagem);
+  const canvas = document.getElementById("graficoPorIssueType");
+  if (!canvas) return;
 
-    if (chartIssueType) chartIssueType.destroy();
+  const contagem = contarPorCampo(dados, "Issue Type");
+  const labels = Object.keys(contagem);
+  const valores = Object.values(contagem);
 
-    chartIssueType = new Chart(document.getElementById("graficoPorIssueType"), {
-        type: "bar",
-        data: {
-            labels,
-            datasets: [{
-                data: valores,
-                backgroundColor: "#F2C700",
-                borderRadius: 4
-            }]
-        },
-        options: chartAnimOptions({
-            indexAxis: "y",
-            plugins: {
-                legend: { display: false },
-                datalabels: {
-                    color: "#000",
-                    align: "right",
-                    anchor: "end",
-                    font: { weight: "bold", size: 10 }
-                }
-            },
-            scales: {
-                x: { beginAtZero: true, precision: 0 }
-            }
-        })
-    });
+  if (chartIssueType) chartIssueType.destroy();
+
+  chartIssueType = new Chart(canvas, {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [{
+        data: valores,
+        backgroundColor: "#F2C700",
+        borderRadius: 4
+      }]
+    },
+    options: chartAnimOptions({
+      indexAxis: "y",
+      plugins: {
+        legend: { display: false },
+        datalabels: {
+          color: "#000",
+          align: "right",
+          anchor: "end",
+          font: { weight: "bold", size: 10 }
+        }
+      },
+      scales: {
+        x: { beginAtZero: true, precision: 0 }
+      }
+    })
+  });
 }
 
 // ===============================
 // TABELA
 // ===============================
 function atualizarTabela(dados) {
-    const tb = document.getElementById("tabelaSRs");
-    tb.innerHTML = "";
+  const tb = document.getElementById("tabelaSRs");
+  if (!tb) return; // página de gráficos não tem tabela
 
-    dados.forEach(d => {
-        const tr = document.createElement("tr");
+  tb.innerHTML = "";
 
-        [
-            "Número SR",
-            "Serviço",
-            "Issue Type",
-            "Status",
-            "Severidade",
-            "Criado_dt",
-            "Atualizado_dt",
-            "Contato Primário"
-        ].forEach(campo => {
-            const td = document.createElement("td");
-            td.textContent = d[campo] || "";
-            tr.appendChild(td);
-        });
+  dados.forEach(d => {
+    const tr = document.createElement("tr");
 
-        tb.appendChild(tr);
+    [
+      "Número SR",
+      "Serviço",
+      "Issue Type",
+      "Status",
+      "Severidade",
+      "Criado_dt",
+      "Atualizado_dt",
+      "Contato Primário"
+    ].forEach(campo => {
+      const td = document.createElement("td");
+      td.textContent = d[campo] || "";
+      tr.appendChild(td);
     });
+
+    tb.appendChild(tr);
+  });
 }
 
 // ===============================
 // ATUALIZAÇÃO GERAL
 // ===============================
 function atualizarDashboard() {
-    let filtrados = filtrarDados();
-    filtrados = aplicarBusca(filtrados);
+  let filtrados = filtrarDados();
+  filtrados = aplicarBusca(filtrados);
 
-    atualizarKPIs(filtrados);
-    atualizarGraficoPorServico(filtrados);
-    atualizarGraficoPorSeveridade(filtrados);
-    atualizarGraficoPorData(filtrados);
-    atualizarGraficoPorIssueType(filtrados);
-    atualizarTabela(filtrados);
+  atualizarKPIs(filtrados);
+  atualizarGraficoPorServico(filtrados);
+  atualizarGraficoPorSeveridade(filtrados);
+  atualizarGraficoPorData(filtrados);
+  atualizarGraficoPorIssueType(filtrados);
+  atualizarTabela(filtrados);
 
-    animarAtualizacao();
+  animarAtualizacao();
 }
 
 // ===============================
 // INICIALIZAÇÃO
 // ===============================
 function preencherFiltros() {
-    const servicos = valoresUnicos(dadosBrutos, "Serviço");
-    const status = valoresUnicos(dadosBrutos, "Status");
-    const severidades = valoresUnicos(dadosBrutos, "Severidade");
+  const servicos = valoresUnicos(dadosBrutos, "Serviço");
+  const status = valoresUnicos(dadosBrutos, "Status");
+  const severidades = valoresUnicos(dadosBrutos, "Severidade");
 
-    const selServico = document.getElementById("filtroServico");
-    const selStatus = document.getElementById("filtroStatus");
-    const selSeveridade = document.getElementById("filtroSeveridade");
+  const selServico = document.getElementById("filtroServico");
+  const selStatus = document.getElementById("filtroStatus");
+  const selSeveridade = document.getElementById("filtroSeveridade");
 
-    servicos.forEach(v => selServico.innerHTML += `<option value="${v}">${v}</option>`);
-    status.forEach(v => selStatus.innerHTML += `<option value="${v}">${v}</option>`);
-    severidades.forEach(v => selSeveridade.innerHTML += `<option value="${v}">${v}</option>`);
+  if (selServico) servicos.forEach(v => selServico.innerHTML += `<option value="${v}">${v}</option>`);
+  if (selStatus) status.forEach(v => selStatus.innerHTML += `<option value="${v}">${v}</option>`);
+  if (selSeveridade) severidades.forEach(v => selSeveridade.innerHTML += `<option value="${v}">${v}</option>`);
 }
 
 async function carregarDados() {
-    const resp = await fetch("dados_sr.csv");
-    const texto = await resp.text();
+  const resp = await fetch("dados_sr.csv");
+  const texto = await resp.text();
 
-    dadosBrutos = parseCSV(texto);
+  dadosBrutos = parseCSV(texto);
 
-    preencherFiltros();
-    atualizarDashboard();
-    iniciarRotacaoAutomatica();
+  preencherFiltros();
+  atualizarDashboard();
 
-    document.getElementById("filtroServico").addEventListener("change", atualizarDashboard);
-    document.getElementById("filtroStatus").addEventListener("change", atualizarDashboard);
-    document.getElementById("filtroSeveridade").addEventListener("change", atualizarDashboard);
-    document.getElementById("buscaTabela").addEventListener("input", atualizarDashboard);
+  const filtroServico = document.getElementById("filtroServico");
+  const filtroStatus = document.getElementById("filtroStatus");
+  const filtroSeveridade = document.getElementById("filtroSeveridade");
+  const buscaTabela = document.getElementById("buscaTabela");
+  const btnTv = document.getElementById("btnTvMode");
 
-    const btnTv = document.getElementById("btnTvMode");
-    if (btnTv) btnTv.addEventListener("click", toggleTvMode);
+  if (filtroServico) filtroServico.addEventListener("change", atualizarDashboard);
+  if (filtroStatus) filtroStatus.addEventListener("change", atualizarDashboard);
+  if (filtroSeveridade) filtroSeveridade.addEventListener("change", atualizarDashboard);
+  if (buscaTabela) buscaTabela.addEventListener("input", atualizarDashboard);
+  if (btnTv) btnTv.addEventListener("click", toggleTvMode);
 }
 
 carregarDados();

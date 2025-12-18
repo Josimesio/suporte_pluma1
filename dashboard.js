@@ -74,19 +74,31 @@ function valoresUnicos(lista, campo) {
 // CSV simples (suporta vírgulas dentro de aspas)
 function parseCSV(texto) {
   const linhas = texto.split(/\r?\n/).filter(l => l.trim() !== "");
-  const cabecalho = linhas[0].split(",");
+  if (!linhas.length) return [];
+
+  // ✅ split de cabeçalho
+  const cabecalho = linhas[0].split(",").map(h => h.trim());
+
+  // ✅ remove BOM invisível do primeiro header (mata o bug das colunas "sumindo")
+  if (cabecalho[0]) cabecalho[0] = cabecalho[0].replace(/^\uFEFF/, "");
+
   const dados = [];
 
   for (let i = 1; i < linhas.length; i++) {
     const cols = linhas[i].split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/);
     const obj = {};
+
     for (let j = 0; j < cabecalho.length; j++) {
-      obj[cabecalho[j].trim()] = (cols[j] || "").replace(/^"|"$/g, "").trim();
+      const key = cabecalho[j];
+      obj[key] = (cols[j] || "").replace(/^"|"$/g, "").trim();
     }
+
     dados.push(obj);
   }
+
   return dados;
 }
+
 
 // ===============================
 // ✅ PARSE DE DATA “À PROVA DE ORACLE”

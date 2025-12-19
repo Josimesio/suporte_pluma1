@@ -41,12 +41,27 @@ body {
     max-height: 40px;
 }
 
-/* ✅ Atualização no cabeçalho */
-.atualizacao-header {
-    font-size: 0.78rem;
-    opacity: 0.92;
-    color: #fff;
-    line-height: 1.1;
+/* =========================
+   BADGE: ÚLTIMA ATUALIZAÇÃO
+   ========================= */
+.pl-atualizacao {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+  font-size: 0.78rem;
+  opacity: 0.95;
+}
+
+.pl-atualizacao .badge {
+  background: rgba(242, 199, 0, 0.16);
+  color: #FFFFFF;
+  border: 1px solid rgba(242, 199, 0, 0.45);
+}
+
+.pl-atualizacao .pl-atualizacao-texto {
+  color: #FFFFFF;
+  opacity: 0.9;
 }
 
 /* MAIN */

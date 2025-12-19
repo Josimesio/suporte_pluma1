@@ -32,19 +32,16 @@
           <div class="col-md-7">
             <h1 class="mb-0">Chamados 2025 - ORACLE</h1>
             <p class="mb-0">Programa Conecta • Grupo Pluma</p>
+            <div id="lblAtualizacao" class="pl-atualizacao">
+              <span class="badge rounded-pill">⏱</span>
+              <span class="pl-atualizacao-texto">Atualizado em: <span id="lblAtualizacaoValor">...</span> (BRT)</span>
+            </div>
           </div>
 
-          <div class="col-md-3 text-md-end text-center d-flex flex-column gap-1 align-items-md-end align-items-center">
-            <div class="d-flex gap-2 justify-content-md-end justify-content-center flex-wrap">
-              <a class="btn btn-sm btn-light" href="index.html">📄 Chamados</a>
-              <a class="btn btn-sm btn-light" href="graficos.html">📊 Gráficos</a>
-              <a class="btn btn-sm btn-light" href="top-contatos.html">👤 Top Contatos</a>
-            </div>
-
-            <!-- ✅ Atualização no cabeçalho -->
-            <div id="infoAtualizacao" class="atualizacao-header">
-              Atualizado em: --
-            </div>
+          <div class="col-md-3 text-md-end text-center d-flex gap-2 justify-content-md-end justify-content-center">
+            <a class="btn btn-sm btn-light" href="index.html">📄 Chamados</a>
+            <a class="btn btn-sm btn-light" href="graficos.html">📊 Gráficos</a>
+            <a class="btn btn-sm btn-light" href="top-contatos.html">👤 Top Contatos</a>
           </div>
 
           <div class="col-md-2 text-md-end text-center">
@@ -198,35 +195,6 @@
 
     let chartTop = null;
 
-    // ✅ Atualiza o texto "Atualizado em:" no cabeçalho
-    function setAtualizadoEm(dateObj, origem = "remoto") {
-      const el = document.getElementById("infoAtualizacao");
-      if (!el) return;
-
-      if (!dateObj || isNaN(dateObj)) {
-        el.textContent = "Atualizado em: data indisponível";
-        return;
-      }
-
-      const formatado = dateObj.toLocaleString("pt-BR", {
-        day: "2-digit", month: "2-digit", year: "numeric",
-        hour: "2-digit", minute: "2-digit"
-      });
-
-      const sufixo = (origem === "local") ? " (arquivo local)" : "";
-      el.textContent = `Atualizado em: ${formatado}${sufixo}`;
-    }
-
-    function atualizarInfoArquivoCSVFromResponse(response) {
-      const lm = response.headers.get("Last-Modified");
-      if (!lm) {
-        const el = document.getElementById("infoAtualizacao");
-        if (el) el.textContent = "Atualizado em: data indisponível";
-        return;
-      }
-      setAtualizadoEm(new Date(lm), "remoto");
-    }
-
     // ===============================
     // CSV parser robusto: detecta delimitador + BOM + aspas
     // ===============================
@@ -281,11 +249,20 @@
       return mapa;
     }
 
+    // ✅ badge "Atualizado em" (lê do CSV)
+    function setAtualizacao(dados) {
+      const el = document.getElementById("lblAtualizacaoValor");
+      if (!el) return;
+      const v = (dados?.[0]?.["Gerado_em"] || "").trim();
+      el.textContent = v || "-";
+    }
+
     function topN(mapa, n=10) {
       return Object.entries(mapa).sort((a,b) => b[1] - a[1]).slice(0, n);
     }
 
     function renderTopModulos(dados) {
+      setAtualizacao(dados);
       // 1) dados vazios
       if (!Array.isArray(dados) || !dados.length) {
         statusBox.className = "alert alert-warning py-2 mb-0";
@@ -388,9 +365,6 @@
         const resp = await fetch("dados_sr.csv", { cache: "no-store" });
         if (!resp.ok) throw new Error(`HTTP ${resp.status} (dados_sr.csv não encontrado)`);
 
-        // ✅ mostra data/hora do CSV no cabeçalho
-        atualizarInfoArquivoCSVFromResponse(resp);
-
         const texto = await resp.text();
         const dados = parseCSV(texto);
         renderTopModulos(dados);
@@ -400,19 +374,12 @@
           `Falha ao carregar <b>dados_sr.csv</b> via fetch. Motivo: <b>${e.message}</b><br>` +
           `<span class="small">Se você abriu por duplo clique (file://), isso é normal. Selecione o CSV abaixo.</span>`;
         uploadBox.classList.remove("d-none");
-
-        const el = document.getElementById("infoAtualizacao");
-        if (el) el.textContent = "Atualizado em: -- (aguardando CSV)";
       }
     }
 
     fileInput?.addEventListener("change", async (ev) => {
       const file = ev.target.files?.[0];
       if (!file) return;
-
-      // ✅ data/hora pelo arquivo local selecionado
-      if (file.lastModified) setAtualizadoEm(new Date(file.lastModified), "local");
-
       const texto = await file.text();
       const dados = parseCSV(texto);
       renderTopModulos(dados);

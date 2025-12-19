@@ -2,35 +2,36 @@ let dadosBrutos = [];
 let chartServico, chartSeveridade, chartData, chartIssueType;
 
 // ===============================
+// ✅ BADGE "Atualizado em" (lê do CSV)
+// ===============================
+function atualizarBadgeAtualizacao(dados) {
+  const el = document.getElementById("lblAtualizacaoValor");
+  if (!el) return;
+
+  // tenta pegar do CSV (coluna Gerado_em criada no processo)
+  let v = "";
+  if (Array.isArray(dados) && dados.length) {
+    v = (dados[0]["Gerado_em"] || "").trim();
+  }
+
+  // fallback: hora local do navegador
+  if (!v) {
+    try {
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, "0");
+      v = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+    } catch {
+      v = "-";
+    }
+  }
+
+  el.textContent = v;
+}
+
+// ===============================
 // REGISTRO DO PLUGIN DE RÓTULOS
 // ===============================
 Chart.register(ChartDataLabels);
-
-// ===============================
-// ✅ MOSTRA DATA/HORA DO ARQUIVO (Last-Modified) NO CABEÇALHO
-// ===============================
-function atualizarInfoArquivoCSV(response) {
-  const el = document.getElementById("infoAtualizacao");
-  if (!el) return;
-
-  const lastModified = response.headers.get("Last-Modified");
-  if (!lastModified) {
-    el.textContent = "Atualizado em: data indisponível";
-    return;
-  }
-
-  const data = new Date(lastModified);
-
-  const formatado = data.toLocaleString("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit"
-  });
-
-  el.textContent = `Atualizado em: ${formatado}`;
-}
 
 // ===============================
 // ANIMAÇÃO VISUAL DE ATUALIZAÇÃO
@@ -543,13 +544,13 @@ function preencherFiltros() {
 }
 
 async function carregarDados() {
-  const resp = await fetch("dados_sr.csv", { cache: "no-store" });
-
-  // ✅ pega Last-Modified e mostra no cabeçalho
-  atualizarInfoArquivoCSV(resp);
-
+  const resp = await fetch("dados_sr.csv");
   const texto = await resp.text();
+
   dadosBrutos = parseCSV(texto);
+
+  // ✅ mostra data/hora de geração do CSV (se existir)
+  atualizarBadgeAtualizacao(dadosBrutos);
 
   preencherFiltros();
   atualizarDashboard();

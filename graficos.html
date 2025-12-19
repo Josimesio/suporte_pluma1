@@ -32,9 +32,16 @@
             <p class="mb-0">Programa Conecta • Grupo Pluma</p>
           </div>
 
-          <div class="col-md-3 text-md-end text-center d-flex gap-2 justify-content-md-end justify-content-center">
-            <a class="btn btn-sm btn-light" href="index.html">📄 Chamados</a>
-            <button id="btnTvMode" class="btn btn-sm btn-outline-light">🎬 Modo TV</button>
+          <div class="col-md-3 text-md-end text-center d-flex flex-column gap-1 align-items-md-end align-items-center">
+            <div class="d-flex gap-2 justify-content-md-end justify-content-center flex-wrap">
+              <a class="btn btn-sm btn-light" href="index.html">📄 Chamados</a>
+              <button id="btnTvMode" class="btn btn-sm btn-outline-light">🎬 Modo TV</button>
+            </div>
+
+            <!-- ✅ Atualização no cabeçalho -->
+            <div id="infoAtualizacao" class="atualizacao-header">
+              Atualizado em: --
+            </div>
           </div>
 
           <div class="col-md-2 text-md-end text-center">
@@ -123,8 +130,7 @@
       <!-- GRÁFICOS (2x1 COM SCROLL) -->
       <section class="conteudo-row">
         <div class="container-fluid">
-          <!-- ✅ g-2 para reduzir o distanciamento entre os cards -->
-          <div class="row g-2">
+          <div class="row g-3">
 
             <div class="col-12 col-lg-6">
               <div class="card pl-card-grafico">

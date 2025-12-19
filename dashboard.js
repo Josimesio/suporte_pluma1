@@ -7,6 +7,32 @@ let chartServico, chartSeveridade, chartData, chartIssueType;
 Chart.register(ChartDataLabels);
 
 // ===============================
+// ✅ MOSTRA DATA/HORA DO ARQUIVO (Last-Modified) NO CABEÇALHO
+// ===============================
+function atualizarInfoArquivoCSV(response) {
+  const el = document.getElementById("infoAtualizacao");
+  if (!el) return;
+
+  const lastModified = response.headers.get("Last-Modified");
+  if (!lastModified) {
+    el.textContent = "Atualizado em: data indisponível";
+    return;
+  }
+
+  const data = new Date(lastModified);
+
+  const formatado = data.toLocaleString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+
+  el.textContent = `Atualizado em: ${formatado}`;
+}
+
+// ===============================
 // ANIMAÇÃO VISUAL DE ATUALIZAÇÃO
 // ===============================
 function animarAtualizacao() {
@@ -517,9 +543,12 @@ function preencherFiltros() {
 }
 
 async function carregarDados() {
-  const resp = await fetch("dados_sr.csv");
-  const texto = await resp.text();
+  const resp = await fetch("dados_sr.csv", { cache: "no-store" });
 
+  // ✅ pega Last-Modified e mostra no cabeçalho
+  atualizarInfoArquivoCSV(resp);
+
+  const texto = await resp.text();
   dadosBrutos = parseCSV(texto);
 
   preencherFiltros();

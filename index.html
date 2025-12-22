@@ -11,28 +11,29 @@
     integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
     crossorigin="anonymous"
   />
-
   <link rel="stylesheet" href="estilo.css" />
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 </head>
 
 <body>
   <div class="app-wrapper d-flex flex-column">
 
+    <!-- HEADER -->
     <header class="pl-header">
       <div class="container-fluid">
         <div class="row align-items-center g-2">
           <div class="col-md-7">
             <h1 class="mb-0">Chamados 2025 - ORACLE</h1>
             <p class="mb-0">Programa Conecta • Grupo Pluma</p>
-            <div class="small text-white-50">
-              Atualizado em: <span id="atualizadoEm">...</span>
-            </div>
+            <p class="mb-0 small text-white-50">⏱ Atualizado em: <span id="atualizadoEm">-</span></p>
           </div>
 
           <div class="col-md-3 text-md-end text-center d-flex gap-2 justify-content-md-end justify-content-center">
-            <a class="btn btn-sm btn-light" href="graficos.html">📊 Gráficos</a>
             <a class="btn btn-sm btn-light" href="top-modulos.html">🧩 Top Módulos</a>
             <a class="btn btn-sm btn-light" href="top-contatos.html">👤 Top Contatos</a>
+            <a class="btn btn-sm btn-light" href="graficos.html">📊 Gráficos</a>
             <button id="btnTvMode" class="btn btn-sm btn-outline-light">🎬 Modo TV</button>
           </div>
 
@@ -45,14 +46,25 @@
 
     <main class="dashboard-main flex-grow-1 d-flex flex-column">
 
+      <!-- STATUS / ERRO / UPLOAD -->
       <section class="py-2 bg-white border-bottom">
         <div class="container-fluid">
           <div id="statusBox" class="alert alert-info py-2 mb-0">
-            Carregando dados... (dados_sr.csv)
+            Carregando dados... (tentando <b>dados_sr.csv</b>)
+          </div>
+
+          <div id="uploadBox" class="mt-2 d-none">
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+              <input class="form-control form-control-sm" type="file" id="fileInput" accept=".csv" style="max-width: 420px;">
+              <span class="small text-muted">
+                Se o CSV não foi encontrado na web ou você abriu por arquivo (file://), selecione o <b>dados_sr.csv</b> aqui.
+              </span>
+            </div>
           </div>
         </div>
       </section>
 
+      <!-- FILTROS -->
       <section class="py-2 bg-white border-bottom filtros-section">
         <div class="container-fluid">
           <div class="row g-2 align-items-end">
@@ -91,8 +103,9 @@
         </div>
       </section>
 
+      <!-- KPIs -->
       <section class="py-2 flex-shrink-0">
-        <div class="container-fluid">
+        <div class="container-fluid h-100">
           <div class="row g-2 kpi-row">
             <div class="col-6 col-lg-3">
               <div class="card pl-card-kpi text-center kpi-card">
@@ -133,6 +146,7 @@
         </div>
       </section>
 
+      <!-- LISTA -->
       <section class="conteudo-row flex-grow-1">
         <div class="container-fluid h-100">
           <div class="card pl-card-tabela tabela-card h-100">
@@ -168,7 +182,7 @@
     </main>
 
     <footer class="text-center small text-muted py-1 pl-footer">
-      Programa Conecta • Dashboard gerado a partir de CSV
+      Programa Conecta • Dashboard gerado a partir de planilha Excel
     </footer>
   </div>
 
@@ -178,7 +192,6 @@
     crossorigin="anonymous"
   ></script>
 
-  <!-- ✅ JS EXCLUSIVO DO INDEX -->
   <script src="index.js"></script>
 </body>
 </html>

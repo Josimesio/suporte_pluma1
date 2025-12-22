@@ -314,27 +314,47 @@
       })
     });
   }
+function atualizarGraficoServico(lista) {
+  const map = contarPorCampo(lista, "Serviço");
 
-  function atualizarGraficoServico(lista) {
-    const map = contarPorCampo(lista, "Serviço");
+  chartServico?.destroy();
+  chartServico = new Chart(canvasServico, {
+    type: "bar",
+    data: {
+      labels: Object.keys(map),
+      datasets: [{
+        data: Object.values(map),
+        backgroundColor: PLUMA.verdeEscuro,
+        borderRadius: 6
+      }]
+    },
+    options: baseOptions({
+      plugins: {
+        legend: { display: false },
 
-    chartServico?.destroy();
-    chartServico = new Chart(canvasServico, {
-      type: "bar",
-      data: {
-        labels: Object.keys(map),
-        datasets: [{
-          data: Object.values(map),
-          backgroundColor: PLUMA.verdeEscuro,
-          borderRadius: 6
-        }]
+        // ✅ MOSTRA O VALOR EM CADA BARRA
+        datalabels: {
+          display: true,
+          color: "#000",
+          anchor: "end",
+          align: "top",
+          offset: 2,
+          font: {
+            weight: "bold",
+            size: 11
+          },
+          formatter: (value) => value
+        }
       },
-      options: baseOptions({
-        plugins: { legend: { display: false } },
-        scales: { y: { beginAtZero: true, precision: 0 } }
-      })
-    });
-  }
+      scales: {
+        y: {
+          beginAtZero: true,
+          precision: 0
+        }
+      }
+    })
+  });
+}
 
   function atualizarGraficoSeveridade(lista) {
     const map = contarPorCampo(lista, "Severidade");

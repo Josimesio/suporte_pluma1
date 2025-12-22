@@ -56,6 +56,24 @@
     </div>
   </header>
 
+  <!-- ✅ STATUS / ERRO / UPLOAD (mesmo padrão do index) -->
+  <section class="py-2 bg-white border-bottom">
+    <div class="container-fluid">
+      <div id="statusBox" class="alert alert-info py-2 mb-0">
+        Carregando dados... (tentando <b>dados_sr.csv</b>)
+      </div>
+
+      <div id="uploadBox" class="mt-2 d-none">
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+          <input class="form-control form-control-sm" type="file" id="fileInput" accept=".csv" style="max-width: 420px;">
+          <span class="small text-muted">
+            Se o CSV não foi encontrado na web ou você abriu por arquivo (file://), selecione o <b>dados_sr.csv</b> aqui.
+          </span>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <main class="dashboard-main flex-grow-1">
 
     <!-- FILTROS -->

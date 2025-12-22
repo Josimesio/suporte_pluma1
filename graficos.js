@@ -1,9 +1,9 @@
 /* ===============================
    graficos.js – Dashboard Pluma
-   (robusto + meses Jan-Dez)
    =============================== */
 
 (function () {
+
   // Register do plugin sem quebrar se não existir
   if (window.Chart && window.ChartDataLabels) {
     Chart.register(ChartDataLabels);
@@ -20,7 +20,7 @@
 
   const MESES = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
 
-  /* ===== DOM (NÃO depender de global por id) ===== */
+  /* ===== DOM ===== */
   const el = (id) => document.getElementById(id);
 
   const filtroServico    = el("filtroServico");
@@ -42,24 +42,7 @@
 
   const tbodyAfx = el("rankingAbertosFechadosMes");
 
-  // Se faltar algo essencial, aborta com log (evita branco sem pista)
-  const essenciais = [filtroServico, filtroStatus, filtroSeveridade, canvasCriados, canvasIssue, canvasAfx, canvasServico, canvasSev, tbodyAfx];
-  if (essenciais.some(x => !x)) {
-    console.error("IDs essenciais não encontrados no HTML. Verifique graficos.html.", {
-      filtroServico: !!filtroServico,
-      filtroStatus: !!filtroStatus,
-      filtroSeveridade: !!filtroSeveridade,
-      graficoPorData: !!canvasCriados,
-      graficoPorIssueType: !!canvasIssue,
-      graficoAbertosFechadosMes: !!canvasAfx,
-      graficoPorServico: !!canvasServico,
-      graficoPorSeveridade: !!canvasSev,
-      rankingAbertosFechadosMes: !!tbodyAfx
-    });
-    return;
-  }
-
-  /* ===== CSV Parser (com aspas) ===== */
+  /* ===== CSV Parser ===== */
   function parseCSV(texto) {
     const linhas = texto.split(/\r?\n/).filter(l => l.trim() !== "");
     if (!linhas.length) return [];
@@ -68,7 +51,6 @@
     const out = [];
 
     for (let i = 1; i < linhas.length; i++) {
-      // split por vírgula respeitando aspas
       const cols = linhas[i].split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/);
       const obj = {};
       for (let j = 0; j < cab.length; j++) {
@@ -90,13 +72,11 @@
     if (!s) return null;
     s = s.replace(/^"|"$/g, "").trim();
 
-    // normaliza "YYYY-MM-DD HH:MM" -> ISO
     if (/^\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}/.test(s)) s = s.replace(" ", "T");
 
     let d = new Date(s);
     if (!isNaN(d)) return d;
 
-    // tenta dd/MM/yyyy HH:mm(:ss)
     const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?$/);
     if (m) {
       let dia = parseInt(m[1], 10);
@@ -125,11 +105,11 @@
     return map;
   }
 
-  /* ===== Config base (igual ao padrão anterior) ===== */
+  /* ===== Config base ===== */
   function baseOptions(extra = {}) {
     return {
       responsive: true,
-      maintainAspectRatio: false,  // anti “crescimento”
+      maintainAspectRatio: false,
       plugins: {
         datalabels: { display: false },
         legend: { labels: { color: PLUMA.verdeEscuro } }
@@ -147,14 +127,51 @@
   let chartSeveridade = null;
   let chartAbertosFechadosMes = null;
 
-  /* ===== Header "Atualizado em" ===== */
-  function atualizarAtualizadoEm() {
-    if (!atualizadoEm) return;
-    const v = (dados?.[0]?.["Gerado em"] || "").trim();
-    atualizadoEm.textContent = v || "-";
+  /* ===== 🔹 ADIÇÃO 1: Atualizado em ===== */
+ function atualizarAtualizadoEm(dados) {
+  if (!atualizadoEm || !dados || !dados.length) {
+    if (atualizadoEm) atualizadoEm.textContent = "-";
+    return;
   }
 
-  /* ===== Preencher filtros ===== */
+  // normaliza strings (remove diferença de espaço, maiúscula, _)
+  const normaliza = (s) =>
+    String(s || "")
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, " ")
+      .replace(/_/g, " ");
+
+  const nomesAceitos = [
+    "gerado em",
+    "atualizado em",
+    "Gerado_em",
+    "atualizado_em"
+  ].map(normaliza);
+
+  const chaves = Object.keys(dados[0] || {});
+  const chaveEncontrada = chaves.find(k =>
+    nomesAceitos.includes(normaliza(k))
+  );
+
+  let valor = "";
+
+  if (chaveEncontrada) {
+    // pega o último valor válido (mais recente)
+    for (let i = dados.length - 1; i >= 0; i--) {
+      const v = dados[i][chaveEncontrada];
+      if (v && String(v).trim()) {
+        valor = String(v).trim();
+        break;
+      }
+    }
+  }
+
+  atualizadoEm.textContent = valor || "-";
+}
+
+
+  /* ===== Filtros ===== */
   function preencherFiltros() {
     valoresUnicos(dados, "Serviço").forEach(v => filtroServico.insertAdjacentHTML("beforeend", `<option value="${v}">${v}</option>`));
     valoresUnicos(dados, "Status").forEach(v => filtroStatus.insertAdjacentHTML("beforeend", `<option value="${v}">${v}</option>`));
@@ -176,29 +193,25 @@
 
   /* ===== KPIs ===== */
   function atualizarKPIs(lista) {
-    if (!kpiTotal) return;
     const total = lista.length;
     const fech = lista.filter(d => isFechado(d["Status"])).length;
 
     kpiTotal.textContent = total;
-    if (kpiFechados) kpiFechados.textContent = fech;
-    if (kpiAbertos)  kpiAbertos.textContent  = total - fech;
+    kpiFechados.textContent = fech;
+    kpiAbertos.textContent = total - fech;
 
-    if (kpiTopModulo) {
-      const porServ = contarPorCampo(lista, "Serviço");
-      const top = Object.entries(porServ).sort((a,b)=>b[1]-a[1])[0];
-      kpiTopModulo.textContent = top ? top[0] : "-";
-    }
+    const porServ = contarPorCampo(lista, "Serviço");
+    const top = Object.entries(porServ).sort((a,b)=>b[1]-a[1])[0];
+    kpiTopModulo.textContent = top ? top[0] : "-";
   }
 
-  /* ===== 1) SRs criados por mês (Jan-Dez) ===== */
+  /* ===== GRÁFICOS ===== */
+
   function atualizarGraficoCriadosMes(lista) {
     const contagem = Array(12).fill(0);
-
     lista.forEach(d => {
       const dt = parseDataFlex(d["Criado_dt"]);
-      if (!dt) return;
-      contagem[dt.getMonth()]++;
+      if (dt) contagem[dt.getMonth()]++;
     });
 
     chartCriadosMes?.destroy();
@@ -207,35 +220,28 @@
       data: {
         labels: MESES,
         datasets: [{
-          label: "Criados",
           data: contagem,
           backgroundColor: PLUMA.verdeMedio,
           borderRadius: 6
         }]
       },
       options: baseOptions({
-  plugins: {
-    // mostra o total em cima das barras
-    datalabels: {
-      display: true,
-      color: PLUMA.verdeEscuro,
-      anchor: "end",
-      align: "top",
-      offset: 2,
-      font: { weight: "bold", size: 10 },
-      formatter: (v) => (v && v > 0 ? v : "")
-    },
-    legend: { display: false }
-  },
-  scales: {
-    y: { beginAtZero: true, precision: 0 }
-  }
-})
-
+        plugins: {
+          datalabels: {
+            display: true,
+            color: PLUMA.verdeEscuro,
+            anchor: "end",
+            align: "top",
+            font: { weight: "bold", size: 10 },
+            formatter: v => v > 0 ? v : ""
+          },
+          legend: { display: false }
+        },
+        scales: { y: { beginAtZero: true, precision: 0 } }
+      })
     });
   }
 
-  /* ===== 2) SRs Abertos x Fechados (lado a lado + Jan-Dez) ===== */
   function atualizarGraficoAbertosFechados(lista) {
     const abertos  = Array(12).fill(0);
     const fechados = Array(12).fill(0);
@@ -243,7 +249,6 @@
     lista.forEach(d => {
       const c = parseDataFlex(d["Criado_dt"]);
       if (c) abertos[c.getMonth()]++;
-
       if (isFechado(d["Status"])) {
         const u = parseDataFlex(d["Atualizado_dt"]);
         if (u) fechados[u.getMonth()]++;
@@ -260,41 +265,34 @@
           { label: "Fechados", data: fechados, backgroundColor: PLUMA.amarelo,     borderRadius: 6 }
         ]
       },
-     options: baseOptions({
-  plugins: {
-    // mostra os números em cima das barras SÓ neste gráfico
-    datalabels: {
-      display: true,
-      color: PLUMA.verdeEscuro,
-      anchor: "end",
-      align: "top",
-      offset: 2,
-      font: { weight: "bold", size: 10 },
-      formatter: (v) => (v && v > 0 ? v : "")
-    },
-    legend: { labels: { color: PLUMA.verdeEscuro } }
-  },
-  scales: {
-    x: { stacked: false },
-    y: { beginAtZero: true, precision: 0, stacked: false }
-  }
-})
-
+      options: baseOptions({
+        plugins: {
+          datalabels: {
+            display: true,
+            color: PLUMA.verdeEscuro,
+            anchor: "end",
+            align: "top",
+            font: { weight: "bold", size: 10 },
+            formatter: v => v > 0 ? v : ""
+          }
+        },
+        scales: {
+          x: { stacked: false },
+          y: { beginAtZero: true, precision: 0, stacked: false }
+        }
+      })
     });
 
-    // tabela lateral
     tbodyAfx.innerHTML = "";
     for (let i = 0; i < 12; i++) {
       const a = abertos[i];
       const f = fechados[i];
-      const pct = a ? ((f / a) * 100).toFixed(1) + "%" : "-";
       tbodyAfx.insertAdjacentHTML("beforeend",
-        `<tr><td>${MESES[i]}</td><td>${a}</td><td>${f}</td><td>${pct}</td></tr>`
+        `<tr><td>${MESES[i]}</td><td>${a}</td><td>${f}</td><td>${a ? ((f/a)*100).toFixed(1)+"%" : "-"}</td></tr>`
       );
     }
   }
 
-  /* ===== 3) Issue Type ===== */
   function atualizarGraficoIssueType(lista) {
     const map = contarPorCampo(lista, "Issue Type");
 
@@ -304,7 +302,6 @@
       data: {
         labels: Object.keys(map),
         datasets: [{
-          label: "Issue Type",
           data: Object.values(map),
           backgroundColor: PLUMA.amarelo,
           borderRadius: 6
@@ -318,7 +315,6 @@
     });
   }
 
-  /* ===== 4) Serviço ===== */
   function atualizarGraficoServico(lista) {
     const map = contarPorCampo(lista, "Serviço");
 
@@ -328,7 +324,6 @@
       data: {
         labels: Object.keys(map),
         datasets: [{
-          label: "Serviço",
           data: Object.values(map),
           backgroundColor: PLUMA.verdeEscuro,
           borderRadius: 6
@@ -341,19 +336,11 @@
     });
   }
 
-  /* ===== 5) Severidade (pizza Pluma) ===== */
   function atualizarGraficoSeveridade(lista) {
     const map = contarPorCampo(lista, "Severidade");
     const labels = Object.keys(map);
     const values = Object.values(map);
-
-    const cores = [
-      PLUMA.verdeEscuro,
-      PLUMA.verdeMedio,
-      PLUMA.amarelo,
-      PLUMA.verdeClaro,
-      PLUMA.cinza
-    ];
+    const cores = [PLUMA.verdeEscuro, PLUMA.verdeMedio, PLUMA.amarelo, PLUMA.verdeClaro, PLUMA.cinza];
 
     chartSeveridade?.destroy();
     chartSeveridade = new Chart(canvasSev, {
@@ -361,7 +348,6 @@
       data: {
         labels,
         datasets: [{
-          label: "Severidade",
           data: values,
           backgroundColor: labels.map((_, i) => cores[i % cores.length])
         }]
@@ -383,25 +369,20 @@
     atualizarGraficoSeveridade(filtrados);
   }
 
-  /* ===== Boot ===== */
+  /* ===== 🔹 ADIÇÃO 2: chamada após load ===== */
   fetch("dados_sr.csv", { cache: "no-store" })
-    .then(r => {
-      if (!r.ok) throw new Error("Falha ao carregar dados_sr.csv: HTTP " + r.status);
-      return r.text();
-    })
+    .then(r => r.text())
     .then(texto => {
       dados = parseCSV(texto);
-      atualizarAtualizadoEm();
+
+      atualizarAtualizadoEm(dados); // 👈 única chamada nova
+
       preencherFiltros();
       atualizarTudo();
 
       filtroServico.addEventListener("change", atualizarTudo);
       filtroStatus.addEventListener("change", atualizarTudo);
       filtroSeveridade.addEventListener("change", atualizarTudo);
-    })
-    .catch(err => {
-      console.error(err);
-      alert("Erro ao carregar gráficos. Abra o console (F12) para ver detalhes.");
     });
 
 })();

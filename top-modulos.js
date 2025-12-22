@@ -6,6 +6,7 @@
   const statusBox = document.getElementById("statusBox");
   const uploadBox = document.getElementById("uploadBox");
   const fileInput = document.getElementById("fileInput");
+  const atualizadoEm = document.getElementById("atualizadoEm");
 
   let chartTop = null;
 
@@ -41,12 +42,44 @@
     return dados;
   }
 
-  function setAtualizadoEm(dados) {
-    const el = document.getElementById("atualizadoEm");
-    if (!el) return;
-    const col = "Gerado em";
-    const v = (dados && dados.length && dados[0] && dados[0][col]) ? String(dados[0][col]).trim() : "";
-    el.textContent = v || "-";
+  function atualizarAtualizadoEm(dados) {
+    if (!atualizadoEm || !dados || !dados.length) {
+      if (atualizadoEm) atualizadoEm.textContent = "-";
+      return;
+    }
+
+    const normaliza = (s) =>
+      String(s || "")
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, " ")
+        .replace(/_/g, " ");
+
+    const nomesAceitos = [
+      "gerado em",
+      "atualizado em",
+      "gerado_em",
+      "atualizado_em"
+    ].map(normaliza);
+
+    const chaves = Object.keys(dados[0] || {});
+    const chaveEncontrada = chaves.find(k =>
+      nomesAceitos.includes(normaliza(k))
+    );
+
+    let valor = "";
+
+    if (chaveEncontrada) {
+      for (let i = dados.length - 1; i >= 0; i--) {
+        const v = dados[i][chaveEncontrada];
+        if (v && String(v).trim()) {
+          valor = String(v).trim();
+          break;
+        }
+      }
+    }
+
+    atualizadoEm.textContent = valor || "-";
   }
 
   function contarPorCampo(lista, campo) {
@@ -70,7 +103,7 @@
       return;
     }
 
-    setAtualizadoEm(dados);
+    atualizarAtualizadoEm(dados); // ✅ CHAMADA CORRETA
 
     const colunaServico =
       ("Serviço" in dados[0]) ? "Serviço" :
@@ -100,9 +133,10 @@
     tb.innerHTML = "";
     top.forEach(([modulo, qtd], idx) => {
       const pct = totalSR ? ((qtd / totalSR) * 100).toFixed(1) : "0.0";
-      const tr = document.createElement("tr");
-      tr.innerHTML = `<td>${idx + 1}</td><td>${modulo}</td><td>${qtd}</td><td>${pct}%</td>`;
-      tb.appendChild(tr);
+      tb.insertAdjacentHTML(
+        "beforeend",
+        `<tr><td>${idx + 1}</td><td>${modulo}</td><td>${qtd}</td><td>${pct}%</td></tr>`
+      );
     });
 
     const labels = top.map(x => x[0]);

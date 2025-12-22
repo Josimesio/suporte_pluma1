@@ -6,6 +6,7 @@
   const statusBox = document.getElementById("statusBox");
   const uploadBox = document.getElementById("uploadBox");
   const fileInput = document.getElementById("fileInput");
+  const atualizadoEm = document.getElementById("atualizadoEm");
 
   let chartTop = null;
 
@@ -28,12 +29,43 @@
     return dados;
   }
 
-  function setAtualizadoEm(dados) {
-    const el = document.getElementById("atualizadoEm");
-    if (!el) return;
-    const col = "Gerado em";
-    const v = (dados && dados.length && dados[0] && dados[0][col]) ? String(dados[0][col]).trim() : "";
-    el.textContent = v || "-";
+  // ✅ robusto: encontra coluna "Gerado em"/"Atualizado em" mesmo com variações
+  function atualizarAtualizadoEm(dados) {
+    if (!atualizadoEm || !dados || !dados.length) {
+      if (atualizadoEm) atualizadoEm.textContent = "-";
+      return;
+    }
+
+    const normaliza = (s) =>
+      String(s || "")
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, " ")
+        .replace(/_/g, " ");
+
+    const nomesAceitos = [
+      "gerado em",
+      "atualizado em",
+      "gerado_em",
+      "atualizado_em"
+    ].map(normaliza);
+
+    const chaves = Object.keys(dados[0] || {});
+    const chaveEncontrada = chaves.find(k => nomesAceitos.includes(normaliza(k)));
+
+    let valor = "";
+    if (chaveEncontrada) {
+      // pega o último valor válido (mais recente)
+      for (let i = dados.length - 1; i >= 0; i--) {
+        const v = dados[i][chaveEncontrada];
+        if (v && String(v).trim()) {
+          valor = String(v).trim();
+          break;
+        }
+      }
+    }
+
+    atualizadoEm.textContent = valor || "-";
   }
 
   function contarPorCampo(lista, campo) {
@@ -57,7 +89,8 @@
       return;
     }
 
-    setAtualizadoEm(dados);
+    // ✅ substitui o setAtualizadoEm frágil
+    atualizarAtualizadoEm(dados);
 
     const coluna = "Contato Primário";
     if (!(coluna in dados[0])) {

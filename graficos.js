@@ -214,9 +214,24 @@
         }]
       },
       options: baseOptions({
-        plugins: { legend: { display: false } },
-        scales: { y: { beginAtZero: true, precision: 0 } }
-      })
+  plugins: {
+    // mostra o total em cima das barras
+    datalabels: {
+      display: true,
+      color: PLUMA.verdeEscuro,
+      anchor: "end",
+      align: "top",
+      offset: 2,
+      font: { weight: "bold", size: 10 },
+      formatter: (v) => (v && v > 0 ? v : "")
+    },
+    legend: { display: false }
+  },
+  scales: {
+    y: { beginAtZero: true, precision: 0 }
+  }
+})
+
     });
   }
 

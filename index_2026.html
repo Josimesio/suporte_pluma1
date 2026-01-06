@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Chamados 2026 - ORACLE</title>
+
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+    crossorigin="anonymous"
+  />
+  <link rel="stylesheet" href="estilo.css" />
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+</head>
+
+<body>
+  <div class="app-wrapper d-flex flex-column">
+
+    <!-- HEADER -->
+    <header class="pl-header">
+      <div class="container-fluid">
+        <div class="row align-items-center g-2">
+          <div class="col-md-7">
+            <h1 class="mb-0">Chamados 2026 - ORACLE</h1>
+            <p class="mb-0">Programa Conecta • Grupo Pluma</p>
+            <p class="mb-0 small text-white-50">⏱ Atualizado em: <span id="atualizadoEm">-</span></p>
+          </div>
+
+          
+          <div class="col-md-3 text-md-end text-center d-flex flex-column gap-2 justify-content-md-end justify-content-center">
+            <div class="d-flex flex-wrap gap-2 justify-content-md-end justify-content-center">
+              <a class="btn btn-sm btn-outline-light" href="index_principal.html">🏠 Index Principal</a>
+              <span class="badge bg-warning text-dark align-self-center">Ano 2026</span>
+              <a class="btn btn-sm btn-light" href="index_2026.html">📄 Chamados</a>
+              <a class="btn btn-sm btn-light" href="graficos_2026.html">📊 Gráficos</a>
+              <a class="btn btn-sm btn-light" href="top-modulos_2026.html">🧩 Top Módulos</a>
+              <a class="btn btn-sm btn-light" href="top-contatos_2026.html">👤 Top Contatos</a>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2 justify-content-md-end justify-content-center">
+              <span class="badge bg-secondary align-self-center">Trocar</span>
+              <a class="btn btn-sm btn-outline-light" href="index_2025.html">📄 2025</a>
+              <a class="btn btn-sm btn-outline-light" href="graficos_2025.html">📊 2025</a>
+              <a class="btn btn-sm btn-outline-light" href="top-modulos_2025.html">🧩 2025</a>
+              <a class="btn btn-sm btn-outline-light" href="top-contatos_2025.html">👤 2025</a>
+            </div>
+          </div>
+
+          <div class="col-md-2 text-md-end text-center">
+            <img src="logo-conecta.png" alt="Logo Programa Conecta" class="logo-conecta img-fluid">
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="dashboard-main flex-grow-1 d-flex flex-column">
+
+      <!-- STATUS / ERRO / UPLOAD -->
+      <section class="py-2 bg-white border-bottom">
+        <div class="container-fluid">
+          <div id="statusBox" class="alert alert-info py-2 mb-0">
+            Carregando dados... (tentando <b>dados_sr.csv</b>)
+          </div>
+
+          <div id="uploadBox" class="mt-2 d-none">
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+              <input class="form-control form-control-sm" type="file" id="fileInput" accept=".csv" style="max-width: 420px;">
+              <span class="small text-muted">
+                Se o CSV não foi encontrado na web ou você abriu por arquivo (file://), selecione o <b>dados_sr.csv</b> aqui.
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- FILTROS -->
+      <section class="py-2 bg-white border-bottom filtros-section">
+        <div class="container-fluid">
+          <div class="row g-2 align-items-end">
+            <div class="col-12 col-md-3">
+              <label for="filtroServico" class="form-label pl-label mb-1">Serviço (Módulo):</label>
+              <select id="filtroServico" class="form-select form-select-sm">
+                <option value="">Todos</option>
+              </select>
+            </div>
+
+            <div class="col-12 col-md-3">
+              <label for="filtroStatus" class="form-label pl-label mb-1">Status:</label>
+              <select id="filtroStatus" class="form-select form-select-sm">
+                <option value="">Todos</option>
+              </select>
+            </div>
+
+            <div class="col-12 col-md-3">
+              <label for="filtroSeveridade" class="form-label pl-label mb-1">Severidade:</label>
+              <select id="filtroSeveridade" class="form-select form-select-sm">
+                <option value="">Todas</option>
+              </select>
+            </div>
+
+            <div class="col-12 col-md-3">
+              <label for="buscaTabela" class="form-label pl-label mb-1">Busca rápida:</label>
+              <input
+                id="buscaTabela"
+                class="form-control form-control-sm"
+                type="text"
+                placeholder="SR, serviço, issue type, status, contato..."
+                autocomplete="off"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- KPIs -->
+      <section class="py-2 flex-shrink-0">
+        <div class="container-fluid h-100">
+          <div class="row g-2 kpi-row">
+            <div class="col-6 col-lg-3">
+              <div class="card pl-card-kpi text-center kpi-card">
+                <div class="card-body py-2">
+                  <h3 class="card-title mb-1">Total de SRs</h3>
+                  <p class="card-text kpi-valor mb-0" id="kpiTotal">...</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-6 col-lg-3">
+              <div class="card pl-card-kpi text-center kpi-card">
+                <div class="card-body py-2">
+                  <h3 class="card-title mb-1">SRs Abertos</h3>
+                  <p class="card-text kpi-valor mb-0" id="kpiAbertos">...</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-6 col-lg-3">
+              <div class="card pl-card-kpi text-center kpi-card">
+                <div class="card-body py-2">
+                  <h3 class="card-title mb-1">SRs Fechados</h3>
+                  <p class="card-text kpi-valor mb-0" id="kpiFechados">...</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-6 col-lg-3">
+              <div class="card pl-card-kpi text-center kpi-card">
+                <div class="card-body py-2">
+                  <h3 class="card-title mb-1">Módulo com mais SR</h3>
+                  <p class="card-text kpi-valor mb-0" id="kpiTopModulo">...</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- LISTA -->
+      <section class="conteudo-row flex-grow-1">
+        <div class="container-fluid h-100">
+          <div class="card pl-card-tabela tabela-card h-100">
+            <div class="card-body py-2 d-flex flex-column h-100">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <h2 class="card-title fs-6 mb-0">Lista de Chamados (SRs)</h2>
+                <span class="small text-muted">Use filtros + busca pra ir no alvo 🎯</span>
+              </div>
+
+              <div class="tabela-container flex-grow-1">
+                <table class="table table-striped table-hover table-sm align-middle mb-0">
+                  <thead>
+                    <tr>
+                      <th>Número SR</th>
+                      <th>Serviço</th>
+                      <th>Issue Type</th>
+                      <th>Status</th>
+                      <th>Severidade</th>
+                      <th>Criado_dt</th>
+                      <th>Atualizado_dt</th>
+                      <th>Contato Primário</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tabelaSRs"></tbody>
+                </table>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="text-center small text-muted py-1 pl-footer">
+      Programa Conecta • Dashboard gerado a partir de planilha Excel
+    </footer>
+  </div>
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYF0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+    crossorigin="anonymous"
+  ></script>
+
+  <script src="index_2026.js"></script>
+</body>
+</html>

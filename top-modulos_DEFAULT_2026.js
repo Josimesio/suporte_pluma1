@@ -1,4 +1,4 @@
-/* top-contatos.js - Página: top-contatos.html */
+/* top-modulos.js - Página: top-modulos.html */
 
 (function () {
   if (window.Chart && window.ChartDataLabels) Chart.register(ChartDataLabels);
@@ -14,22 +14,34 @@
     const linhas = texto.split(/\r?\n/).filter(l => l.trim() !== "");
     if (!linhas.length) return [];
 
-    const cabecalho = linhas[0].split(",").map(h => h.trim());
-    if (cabecalho[0]) cabecalho[0] = cabecalho[0].replace(/^\uFEFF/, "");
+    const headerLine = linhas[0].replace(/^\uFEFF/, "");
+    const candidatos = [",", ";", "\t", "|"];
 
+    let delim = ",";
+    let maxCols = 1;
+    for (const d of candidatos) {
+      const cols = headerLine.split(d).length;
+      if (cols > maxCols) { maxCols = cols; delim = d; }
+    }
+    if (maxCols <= 1) return [];
+
+    const splitLinha = (line) =>
+      line.split(new RegExp(`${delim}(?=(?:[^"]*"[^"]*")*[^"]*$)`));
+
+    const cabecalho = splitLinha(headerLine).map(h => h.trim().replace(/^"|"$/g, ""));
     const dados = [];
+
     for (let i = 1; i < linhas.length; i++) {
-      const cols = linhas[i].split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/);
+      const cols = splitLinha(linhas[i]);
       const obj = {};
       for (let j = 0; j < cabecalho.length; j++) {
         obj[cabecalho[j]] = (cols[j] || "").replace(/^"|"$/g, "").trim();
       }
-      if (Object.values(obj).some(v => String(v || "").trim() !== "")) dados.push(obj);
+      if (Object.values(obj).some(v => v && String(v).trim() !== "")) dados.push(obj);
     }
     return dados;
   }
 
-  // ✅ robusto: encontra coluna "Gerado em"/"Atualizado em" mesmo com variações
   function atualizarAtualizadoEm(dados) {
     if (!atualizadoEm || !dados || !dados.length) {
       if (atualizadoEm) atualizadoEm.textContent = "-";
@@ -51,11 +63,13 @@
     ].map(normaliza);
 
     const chaves = Object.keys(dados[0] || {});
-    const chaveEncontrada = chaves.find(k => nomesAceitos.includes(normaliza(k)));
+    const chaveEncontrada = chaves.find(k =>
+      nomesAceitos.includes(normaliza(k))
+    );
 
     let valor = "";
+
     if (chaveEncontrada) {
-      // pega o último valor válido (mais recente)
       for (let i = dados.length - 1; i >= 0; i--) {
         const v = dados[i][chaveEncontrada];
         if (v && String(v).trim()) {
@@ -89,48 +103,51 @@
       return;
     }
 
-    // ✅ substitui o setAtualizadoEm frágil
-    atualizarAtualizadoEm(dados);
+    atualizarAtualizadoEm(dados); // ✅ CHAMADA CORRETA
 
-    const coluna = "Contato Primário";
-    if (!(coluna in dados[0])) {
+    const colunaServico =
+      ("Serviço" in dados[0]) ? "Serviço" :
+      (("Servico" in dados[0]) ? "Servico" : null);
+
+    if (!colunaServico) {
       statusBox.className = "alert alert-danger py-2 mb-0";
-      statusBox.innerHTML = "Não encontrei a coluna <b>Contato Primário</b> no CSV.";
+      statusBox.innerHTML = "Não encontrei a coluna <b>Serviço/Servico</b> no CSV.";
       uploadBox?.classList.remove("d-none");
       return;
     }
 
     const totalSR = dados.length;
-    const contagem = contarPorCampo(dados, coluna);
-    const contatosUnicos = Object.keys(contagem).length;
+    const contagem = contarPorCampo(dados, colunaServico);
+    const modulosUnicos = Object.keys(contagem).length;
 
     const top = topN(contagem, 10);
     const top1 = top[0]?.[0] || "-";
     const top1Qtd = top[0]?.[1] || 0;
 
     document.getElementById("kpiTotal").textContent = totalSR;
-    document.getElementById("kpiContatos").textContent = contatosUnicos;
+    document.getElementById("kpiModulos").textContent = modulosUnicos;
     document.getElementById("kpiTop1").textContent = top1;
     document.getElementById("kpiTop1Qtd").textContent = top1Qtd;
 
-    const tb = document.getElementById("tabelaTopContatos");
+    const tb = document.getElementById("tabelaTopModulos");
     tb.innerHTML = "";
-    top.forEach(([contato, qtd], idx) => {
+    top.forEach(([modulo, qtd], idx) => {
       const pct = totalSR ? ((qtd / totalSR) * 100).toFixed(1) : "0.0";
-      const tr = document.createElement("tr");
-      tr.innerHTML = `<td>${idx + 1}</td><td>${contato}</td><td>${qtd}</td><td>${pct}%</td>`;
-      tb.appendChild(tr);
+      tb.insertAdjacentHTML(
+        "beforeend",
+        `<tr><td>${idx + 1}</td><td>${modulo}</td><td>${qtd}</td><td>${pct}%</td></tr>`
+      );
     });
 
     const labels = top.map(x => x[0]);
     const valores = top.map(x => x[1]);
 
-    const canvas = document.getElementById("graficoTopContatos");
+    const canvas = document.getElementById("graficoTopModulos");
     if (chartTop) chartTop.destroy();
 
     chartTop = new Chart(canvas, {
       type: "bar",
-      data: { labels, datasets: [{ data: valores, backgroundColor: "#006E51", borderRadius: 4 }] },
+      data: { labels, datasets: [{ data: valores, backgroundColor: "#F2C700", borderRadius: 4 }] },
       options: {
         responsive: true,
         maintainAspectRatio: false,
@@ -149,13 +166,13 @@
 
   async function tentarFetch() {
     try {
-      const resp = await fetch("dados_sr.csv", { cache: "no-store" });
+      const resp = await fetch("dados_sr_2026.csv", { cache: "no-store" });
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       const texto = await resp.text();
       render(parseCSV(texto));
     } catch (e) {
       statusBox.className = "alert alert-danger py-2 mb-0";
-      statusBox.innerHTML = `Falha ao carregar <b>dados_sr.csv</b> via fetch. Motivo: <b>${e.message}</b>`;
+      statusBox.innerHTML = `Falha ao carregar <b>dados_sr_2026.csv</b> via fetch. Motivo: <b>${e.message}</b>`;
       uploadBox?.classList.remove("d-none");
     }
   }

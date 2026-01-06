@@ -166,13 +166,13 @@
 
   async function tentarFetch() {
     try {
-      const resp = await fetch("dados_sr.csv", { cache: "no-store" });
+      const resp = await fetch("dados_sr_2026.csv", { cache: "no-store" });
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       const texto = await resp.text();
       render(parseCSV(texto));
     } catch (e) {
       statusBox.className = "alert alert-danger py-2 mb-0";
-      statusBox.innerHTML = `Falha ao carregar <b>dados_sr.csv</b> via fetch. Motivo: <b>${e.message}</b>`;
+      statusBox.innerHTML = `Falha ao carregar <b>dados_sr_2026.csv</b> via fetch. Motivo: <b>${e.message}</b>`;
       uploadBox?.classList.remove("d-none");
     }
   }

@@ -1,14 +1,16 @@
 ﻿Número SR,Serviço,Issue Type,Status,Severidade,Criado_dt,Atualizado_dt,Contato Primário,Gerado_em
-4-0001778733,Oracle Financials for the Americas,Significant Impairment,Work in Progress,2-Significant,"Jan 12, 2026",Yesterday 9:47 PM,leonardo.guilherme@ninecon.com.br,2026-01-30 08:17:31
-4-0001742917,Oracle Fusion Self Service Procurement Cloud Service,Significant Impairment,Customer Working,2-Significant,"Jan 7, 2026",Yesterday 7:37 PM,mateus.fetzner@plumaagro.com.br,2026-01-30 08:17:31
-4-0001921262,Oracle Fusion Manufacturing Cloud Service,Significant Impairment,Solution Offered,2-Significant,Yesterday 2:18 PM,Yesterday 6:59 PM,larissa.amandio@ninecon.com.br,2026-01-30 08:17:31
-4-0001903869,Oracle Transportation Management Cloud Service,Technical Issue,Customer Working,3-Standard,"Jan 28, 2026",Yesterday 6:34 PM,vanessa.breseghello@ninecon.com.br,2026-01-30 08:17:31
-4-0001780131,Oracle Fusion Tax Cloud Service,Significant Impairment,Review Update,2-Significant,"Jan 12, 2026",Yesterday 5:33 PM,jonatan.molossi@ninecon.com.br,2026-01-30 08:17:31
-4-0001909518,Oracle Fusion Supply Chain Management Common Components,Significant Impairment,Review Update,2-Significant,"Jan 28, 2026",Yesterday 4:40 PM,antonio.sobrinho@ninecon.com.br,2026-01-30 08:17:31
-4-0001892451,Autonomous Database Serverless,Technical Issue,Close Initiated,3-Standard,"Jan 27, 2026",Yesterday 3:16 PM,bruno.petroveski@ninecon.com.br,2026-01-30 08:17:31
-4-0001830209,Oracle Fusion Assets Cloud Service,Technical Issue,Review Update,3-Standard,"Jan 19, 2026",Yesterday 11:30 AM,jair.santos@plumaagro.com.br,2026-01-30 08:17:31
-4-0001903128,Oracle Fusion Tax Cloud Service,Significant Impairment,Customer Working,2-Significant,"Jan 28, 2026","Jan 28, 2026",antonio.sobrinho@ninecon.com.br,2026-01-30 08:17:31
-4-0001861296,Oracle Transportation Intelligence Cloud Service,Significant Impairment,Closed,2-Significant,"Jan 22, 2026","Jan 27, 2026",bruno.petroveski@ninecon.com.br,2026-01-30 08:17:31
-4-0001728530,Oracle Transportation Intelligence Cloud Service,Significant Impairment,Customer Working,2-Significant,"Jan 5, 2026","Jan 27, 2026",bruno.petroveski@ninecon.com.br,2026-01-30 08:17:31
-4-0001815022,Oracle Integration 3,Significant Impairment,Closed,2-Significant,"Jan 16, 2026","Jan 26, 2026",bruno.petroveski@ninecon.com.br,2026-01-30 08:17:31
-4-0001789842,Oracle Fusion Supply Chain Financial Orchestration Foundation,Technical Issue,Closed,3-Standard,"Jan 13, 2026","Jan 24, 2026",antonio.sobrinho@ninecon.com.br,2026-01-30 08:17:31
+4-0001930605,Oracle Transportation Management Cloud Service,General Guidance,Review Update,4-Minimal,Today 11:45 AM,Today 11:51 AM,bruno.santana@ninecon.com.br,2026-01-30 13:30:30
+4-0001929561,Oracle Fusion Project Costing Cloud Service,Technical Issue,New,3-Standard,Today 9:21 AM,Today 10:07 AM,roberto.costa@ninecon.com.br,2026-01-30 13:30:30
+4-0001903128,Oracle Fusion Tax Cloud Service,Significant Impairment,Review Update,2-Significant,"Jan 28, 2026",Today 9:08 AM,antonio.sobrinho@ninecon.com.br,2026-01-30 13:30:30
+4-0001778733,Oracle Financials for the Americas,Significant Impairment,Work in Progress,2-Significant,"Jan 12, 2026",Yesterday 9:47 PM,leonardo.guilherme@ninecon.com.br,2026-01-30 13:30:30
+4-0001742917,Oracle Fusion Self Service Procurement Cloud Service,Significant Impairment,Customer Working,2-Significant,"Jan 7, 2026",Yesterday 7:37 PM,mateus.fetzner@plumaagro.com.br,2026-01-30 13:30:30
+4-0001921262,Oracle Fusion Manufacturing Cloud Service,Significant Impairment,Solution Offered,2-Significant,Yesterday 2:18 PM,Yesterday 6:59 PM,larissa.amandio@ninecon.com.br,2026-01-30 13:30:30
+4-0001903869,Oracle Transportation Management Cloud Service,Technical Issue,Customer Working,3-Standard,"Jan 28, 2026",Yesterday 6:34 PM,vanessa.breseghello@ninecon.com.br,2026-01-30 13:30:30
+4-0001780131,Oracle Fusion Tax Cloud Service,Significant Impairment,Review Update,2-Significant,"Jan 12, 2026",Yesterday 5:33 PM,jonatan.molossi@ninecon.com.br,2026-01-30 13:30:30
+4-0001909518,Oracle Fusion Supply Chain Management Common Components,Significant Impairment,Review Update,2-Significant,"Jan 28, 2026",Yesterday 4:40 PM,antonio.sobrinho@ninecon.com.br,2026-01-30 13:30:30
+4-0001892451,Autonomous Database Serverless,Technical Issue,Close Initiated,3-Standard,"Jan 27, 2026",Yesterday 3:16 PM,bruno.petroveski@ninecon.com.br,2026-01-30 13:30:30
+4-0001830209,Oracle Fusion Assets Cloud Service,Technical Issue,Review Update,3-Standard,"Jan 19, 2026",Yesterday 11:30 AM,jair.santos@plumaagro.com.br,2026-01-30 13:30:30
+4-0001861296,Oracle Transportation Intelligence Cloud Service,Significant Impairment,Closed,2-Significant,"Jan 22, 2026","Jan 27, 2026",bruno.petroveski@ninecon.com.br,2026-01-30 13:30:30
+4-0001728530,Oracle Transportation Intelligence Cloud Service,Significant Impairment,Customer Working,2-Significant,"Jan 5, 2026","Jan 27, 2026",bruno.petroveski@ninecon.com.br,2026-01-30 13:30:30
+4-0001815022,Oracle Integration 3,Significant Impairment,Closed,2-Significant,"Jan 16, 2026","Jan 26, 2026",bruno.petroveski@ninecon.com.br,2026-01-30 13:30:30
+4-0001789842,Oracle Fusion Supply Chain Financial Orchestration Foundation,Technical Issue,Closed,3-Standard,"Jan 13, 2026","Jan 24, 2026",antonio.sobrinho@ninecon.com.br,2026-01-30 13:30:30

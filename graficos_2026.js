@@ -66,11 +66,37 @@
   }
 
   /* ===== Datas ===== */
+
+// ✅ Datas relativas vindas do Oracle (ex.: "Today 2:18 PM", "Yesterday 6:59 PM")
+function parseDataRelativa(valor, baseRef) {
+  const m = String(valor || "").trim()
+    .match(/^(Today|Yesterday)\s+(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+  if (!m) return null;
+
+  const base = baseRef ? new Date(baseRef) : new Date();
+  if (isNaN(base)) return null;
+
+  if (/yesterday/i.test(m[1])) base.setDate(base.getDate() - 1);
+
+  let hh = parseInt(m[2], 10);
+  const mm = parseInt(m[3], 10);
+  const ap = String(m[4] || "").toUpperCase();
+
+  if (ap === "PM" && hh < 12) hh += 12;
+  if (ap === "AM" && hh === 12) hh = 0;
+
+  base.setHours(hh, mm, 0, 0);
+  return base;
+}
   function parseDataFlex(valor) {
     if (!valor) return null;
     let s = String(valor).trim();
     if (!s) return null;
     s = s.replace(/^"|"$/g, "").trim();
+
+    // ✅ tenta interpretar Today/Yesterday usando a data/hora do CSV (Gerado_em)
+    const dRel = parseDataRelativa(s, window.__GERADO_EM_REF__);
+    if (dRel) return dRel;
 
     if (/^\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}/.test(s)) s = s.replace(" ", "T");
 

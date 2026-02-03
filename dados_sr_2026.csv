@@ -1,5 +1,4 @@
 ﻿Número SR,Serviço,Issue Type,Status,Severidade,Criado_dt,Atualizado_dt,Contato Primário,Gerado em
-<<<<<<< HEAD
 4-0001903128,Oracle Fusion Tax Cloud Service,Significant Impairment,Customer Working,2-Significant,2026-01-28 00:00,2026-02-02 19:36,antonio.sobrinho@ninecon.com.br,03/02/2026 08:10
 4-0001742917,Oracle Fusion Self Service Procurement Cloud Service,Significant Impairment,Customer Working,2-Significant,2026-01-07 00:00,2026-02-02 18:58,mateus.fetzner@plumaagro.com.br,03/02/2026 08:10
 4-0001921262,Oracle Fusion Manufacturing Cloud Service,Significant Impairment,Review Update,2-Significant,2026-01-29 00:00,2026-02-02 18:30,larissa.amandio@ninecon.com.br,03/02/2026 08:10
@@ -15,20 +14,3 @@
 4-0001780131,Oracle Fusion Tax Cloud Service,Significant Impairment,Review Update,2-Significant,2026-01-12 00:00,2026-01-29 00:00,jonatan.molossi@ninecon.com.br,03/02/2026 08:10
 4-0001892451,Autonomous Database Serverless,Technical Issue,Close Initiated,3-Standard,2026-01-27 00:00,2026-01-29 00:00,bruno.petroveski@ninecon.com.br,03/02/2026 08:10
 4-0001789842,Oracle Fusion Supply Chain Financial Orchestration Foundation,Technical Issue,Closed,3-Standard,2026-01-13 00:00,2026-01-24 00:00,antonio.sobrinho@ninecon.com.br,03/02/2026 08:10
-=======
-4-0001903128,Oracle Fusion Tax Cloud Service,Significant Impairment,Customer Working,2-Significant,2026-01-28 00:00,2026-02-02 19:36,antonio.sobrinho@ninecon.com.br,02/02/2026 20:24
-4-0001742917,Oracle Fusion Self Service Procurement Cloud Service,Significant Impairment,Customer Working,2-Significant,2026-01-07 00:00,2026-02-02 18:58,mateus.fetzner@plumaagro.com.br,02/02/2026 20:24
-4-0001921262,Oracle Fusion Manufacturing Cloud Service,Significant Impairment,Review Update,2-Significant,2026-01-29 00:00,2026-02-02 18:30,larissa.amandio@ninecon.com.br,02/02/2026 20:24
-4-0001909518,Oracle Fusion Supply Chain Management Common Components,Significant Impairment,Review Update,2-Significant,2026-01-28 00:00,2026-02-02 16:52,antonio.sobrinho@ninecon.com.br,02/02/2026 20:24
-4-0001830209,Oracle Fusion Assets Cloud Service,Technical Issue,Review Update,3-Standard,2026-01-19 00:00,2026-02-02 16:26,jair.santos@plumaagro.com.br,02/02/2026 20:24
-4-0001930605,Oracle Transportation Management Cloud Service,General Guidance,Pending Final Closure,4-Minimal,2026-01-30 00:00,2026-02-02 15:19,bruno.santana@ninecon.com.br,02/02/2026 20:24
-4-0001929561,Oracle Fusion Project Costing Cloud Service,Technical Issue,Customer Working,3-Standard,2026-01-30 00:00,2026-02-02 14:48,roberto.costa@ninecon.com.br,02/02/2026 20:24
-4-0001861296,Oracle Transportation Intelligence Cloud Service,Significant Impairment,Closed,2-Significant,2026-01-22 00:00,2026-02-02 11:58,bruno.petroveski@ninecon.com.br,02/02/2026 20:24
-4-0001815022,Oracle Integration 3,Significant Impairment,Closed,2-Significant,2026-01-16 00:00,2026-02-02 03:25,bruno.petroveski@ninecon.com.br,02/02/2026 20:24
-4-0001778733,Oracle Financials for the Americas,Significant Impairment,Customer Working,2-Significant,2026-01-12 00:00,2026-02-01 16:48,leonardo.guilherme@ninecon.com.br,02/02/2026 20:24
-4-0001728530,Oracle Transportation Intelligence Cloud Service,Significant Impairment,Customer Working,2-Significant,2026-01-05 00:00,2026-02-01 13:07,bruno.petroveski@ninecon.com.br,02/02/2026 20:24
-4-0001903869,Oracle Transportation Management Cloud Service,Technical Issue,Solution Offered,3-Standard,2026-01-28 00:00,2026-01-30 00:00,vanessa.breseghello@ninecon.com.br,02/02/2026 20:24
-4-0001780131,Oracle Fusion Tax Cloud Service,Significant Impairment,Review Update,2-Significant,2026-01-12 00:00,2026-01-29 00:00,jonatan.molossi@ninecon.com.br,02/02/2026 20:24
-4-0001892451,Autonomous Database Serverless,Technical Issue,Close Initiated,3-Standard,2026-01-27 00:00,2026-01-29 00:00,bruno.petroveski@ninecon.com.br,02/02/2026 20:24
-4-0001789842,Oracle Fusion Supply Chain Financial Orchestration Foundation,Technical Issue,Closed,3-Standard,2026-01-13 00:00,2026-01-24 00:00,antonio.sobrinho@ninecon.com.br,02/02/2026 20:24
->>>>>>> b846a214bd208a05ac31c1829c3397ed84c53615

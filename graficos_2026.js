@@ -114,6 +114,27 @@ function parseDataRelativa(valor, baseRef) {
       d = new Date(ano, mes, dia, hh, mm, ss);
       if (!isNaN(d)) return d;
     }
+    
+    // ✅ formato "Jan 7, 2026" (ou "Jan 7 2026") – evita depender do parser do browser
+    const mEng = s.match(/^([A-Za-z]{3})\s+(\d{1,2})(?:,)?\s+(\d{4})(?:\s+(\d{1,2}):(\d{2})\s*(AM|PM)?)?$/);
+    if (mEng) {
+      const mesesEng = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+      const mon = mesesEng[mEng[1]];
+      if (mon !== undefined) {
+        const dia = parseInt(mEng[2],10);
+        const ano = parseInt(mEng[3],10);
+        let hh = parseInt(mEng[4] || "0",10);
+        const mm = parseInt(mEng[5] || "0",10);
+        const ap = String(mEng[6] || "").toUpperCase();
+
+        if (ap === "PM" && hh < 12) hh += 12;
+        if (ap === "AM" && hh === 12) hh = 0;
+
+        const d2 = new Date(ano, mon, dia, hh, mm, 0);
+        if (!isNaN(d2)) return d2;
+      }
+    }
+
     return null;
   }
 
@@ -236,9 +257,10 @@ function parseDataRelativa(valor, baseRef) {
   function atualizarGraficoCriadosMes(lista) {
     const contagem = Array(12).fill(0);
     lista.forEach(d => {
-      const dt = parseDataFlex(d["Criado_dt"]);
-      if (dt) contagem[dt.getMonth()]++;
-    });
+  let dt = parseDataFlex(d["Criado_dt"]);
+  if (!dt) dt = parseDataFlex(d["Atualizado_dt"]);
+  if (dt) contagem[dt.getMonth()]++;
+});
 
     chartCriadosMes?.destroy();
     chartCriadosMes = new Chart(canvasCriados, {
@@ -272,15 +294,28 @@ function parseDataRelativa(valor, baseRef) {
     const abertos  = Array(12).fill(0);
     const fechados = Array(12).fill(0);
 
-    lista.forEach(d => {
-      const c = parseDataFlex(d["Criado_dt"]);
-      if (c) abertos[c.getMonth()]++;
-      if (isFechado(d["Status"])) {
-  let u = parseDataFlex(d["Atualizado_dt"]);
-  if (!u) u = parseDataFlex(d["Criado_dt"]);
-  if (u) fechados[u.getMonth()]++;
+    let __semDataAbertura = 0;
+let __semDataFechamento = 0;
+lista.forEach(d => {
+  // Abertos: tenta Criado_dt, depois Atualizado_dt
+  let c = parseDataFlex(d["Criado_dt"]);
+  if (!c) c = parseDataFlex(d["Atualizado_dt"]);
+  if (c) abertos[c.getMonth()]++;
+  else __semDataAbertura++;
+
+  // Fechados: tenta Atualizado_dt, depois Criado_dt, depois "Gerado em"
+  if (isFechado(d["Status"])) {
+    let u = parseDataFlex(d["Atualizado_dt"]);
+    if (!u) u = parseDataFlex(d["Criado_dt"]);
+    if (!u) u = parseDataFlex(d["Gerado em"]);
+    if (u) fechados[u.getMonth()]++;
+    else __semDataFechamento++;
+  }
+});
+// Se ainda faltar algo, esses contadores ajudam no console
+if (__semDataAbertura || __semDataFechamento) {
+  console.warn("SRs sem data válida (abertura/fechamento):", __semDataAbertura, __semDataFechamento);
 }
-    });
 
     chartAbertosFechadosMes?.destroy();
     chartAbertosFechadosMes = new Chart(canvasAfx, {

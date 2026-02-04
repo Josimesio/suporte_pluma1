@@ -276,9 +276,10 @@ function parseDataRelativa(valor, baseRef) {
       const c = parseDataFlex(d["Criado_dt"]);
       if (c) abertos[c.getMonth()]++;
       if (isFechado(d["Status"])) {
-        const u = parseDataFlex(d["Atualizado_dt"]);
-        if (u) fechados[u.getMonth()]++;
-      }
+  let u = parseDataFlex(d["Atualizado_dt"]);
+  if (!u) u = parseDataFlex(d["Criado_dt"]);
+  if (u) fechados[u.getMonth()]++;
+}
     });
 
     chartAbertosFechadosMes?.destroy();

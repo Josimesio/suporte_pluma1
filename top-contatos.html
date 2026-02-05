@@ -28,10 +28,12 @@
           <div class="col-md-7">
             <h1 class="mb-0">Chamados 2025 - ORACLE</h1>
             <p class="mb-0">Programa Conecta • Grupo Pluma</p>
-            <div id="lblAtualizacao" class="pl-atualizacao">
-              <span class="badge rounded-pill">⏱</span>
-              <span class="pl-atualizacao-texto">Atualizado em: <span id="lblAtualizacaoValor">...</span> (BRT)</span>
-            </div>
+            <div class="pl-atualizacao" aria-label="Atualização do painel">
+  <span class="pl-dot" aria-hidden="true"></span>
+  <span class="pl-label">Atualizado</span>
+  <span class="pl-value"><span id="atualizadoEm">...</span></span>
+  <span class="pl-tz">BRT</span>
+</div>
           </div>
 
           <div class="col-md-3 text-md-end text-center d-flex gap-2 justify-content-md-end justify-content-center">
@@ -205,7 +207,7 @@
 
     // ✅ badge "Atualizado em" (lê do CSV)
     function setAtualizacao(dados) {
-      const el = document.getElementById("lblAtualizacaoValor");
+      const el = document.getElementById("atualizadoEm");
       if (!el) return;
       const v = (dados?.[0]?.["Gerado_em"] || "").trim();
       el.textContent = v || "-";

@@ -169,3 +169,57 @@ async function carregarComparativo() {
 }
 
 carregarComparativo();
+
+// ---------- Atualização no header (index.html) ----------
+function parseCSVSimples(text) {
+  const lines = text.split(/\r?\n/).filter(l => l.trim() !== "");
+  if (!lines.length) return [];
+  const headers = lines[0].replace(/^\uFEFF/, "").split(",").map(h => h.trim());
+  const data = [];
+  for (let i = 1; i < lines.length; i++) {
+    const cols = lines[i].split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/);
+    const obj = {};
+    headers.forEach((h, idx) => obj[h] = (cols[idx] || "").replace(/^"|"$/g, "").trim());
+    data.push(obj);
+  }
+  return data;
+}
+
+function extrairUltimoValorAtualizacao(dados) {
+  if (!dados || !dados.length) return "";
+  const normaliza = (s) => String(s || "")
+    .trim().toLowerCase()
+    .replace(/\s+/g, " ")
+    .replace(/_/g, " ");
+
+  const nomesAceitos = ["gerado em", "atualizado em", "gerado_em", "atualizado_em"].map(normaliza);
+  const chaves = Object.keys(dados[0] || {});
+  const chave = chaves.find(k => nomesAceitos.includes(normaliza(k)));
+  if (!chave) return "";
+
+  for (let i = dados.length - 1; i >= 0; i--) {
+    const v = dados[i][chave];
+    if (v && String(v).trim()) return String(v).trim();
+  }
+  return "";
+}
+
+async function carregarAtualizacaoHeader() {
+  const el = document.getElementById("atualizadoEm");
+  if (!el) return;
+
+  const tentativas = ["dados_sr.csv", "dados_sr_2026.csv", "dados_sr_2025.csv"];
+  for (const arq of tentativas) {
+    try {
+      const resp = await fetch(arq, { cache: "no-store" });
+      if (!resp.ok) continue;
+      const txt = await resp.text();
+      const dados = parseCSVSimples(txt);
+      const v = extrairUltimoValorAtualizacao(dados);
+      if (v) { el.textContent = v; return; }
+    } catch (e) { /* ignora e tenta próximo */ }
+  }
+  el.textContent = "-";
+}
+
+document.addEventListener("DOMContentLoaded", carregarAtualizacaoHeader);
